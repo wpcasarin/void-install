@@ -17,9 +17,9 @@ echo 'export FREETYPE_PROPERTIES="truetype:interpreter-version=38"' > /etc/profi
 sed -i '/CGROUP_MODE/c\CGROUP_MODE=unified' /etc/rc.conf
 sed -i '/HARDWARECLOCK/c\HARDWARECLOCK="UTC"' /etc/rc.conf
 
-ln -s /etc/sv/acpid /var/service
-ln -s /etc/sv/seatd /var/service
-ln -s /etc/sv/dbus /var/service
+# ln -s /etc/sv/acpid /var/service
+# ln -s /etc/sv/seatd /var/service
+# ln -s /etc/sv/dbus /var/service
 
 xbps-alternatives -s booster
 xbps-reconfigure -fa
@@ -32,7 +32,9 @@ if [ -z "$KERNEL_VERSION" ] || [ "$KERNEL_VERSION" = "*" ]; then
 fi
 echo "Detected kernel version: $KERNEL_VERSION"
 
-efibootmgr --create --disk /dev/nvme0n1 --part 1 --label "Void Linux $KERNEL_VERSION" --loader /vmlinuz-$KERNEL_VERSION --unicode "root=LABEL=VOID rw quiet initrd=\\initramfs-$KERNEL_VERSION.img"
+
+UUID=$(blkid -s UUID -o value /dev/nvme0n1p2) || exit 1
+efibootmgr --create --disk /dev/nvme0n1 --part 1 --label "Void Linux $KERNEL_VERSION" --loader /vmlinuz-$KERNEL_VERSION --unicode "root=UUID=$UUID rw quiet initrd=\\initramfs-$KERNEL_VERSION.img"
 
 echo "Enter root password."
 passwd root
